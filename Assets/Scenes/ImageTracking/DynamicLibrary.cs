@@ -6,6 +6,10 @@ using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
+using UnityEngine.Networking;
+using System.Collections;
+using System.Collections.Generic;
+
 namespace UnityEngine.XR.ARFoundation.Samples
 {
     /// <summary>
@@ -47,6 +51,13 @@ namespace UnityEngine.XR.ARFoundation.Samples
             public AddReferenceImageJobState jobState { get; set; }
         }
 
+        [SerializeField]
+        public MutableRuntimeReferenceImageLibrary myRuntimeReferenceImageLibrary;
+
+        private ARTrackedImageManager _ARTrackedImageManager;
+        public string _URLOne;
+        public string _URLTwo;
+
         [SerializeField, Tooltip("The set of images to add to the image library at runtime")]
         ImageData[] m_Images;
 
@@ -73,6 +84,48 @@ namespace UnityEngine.XR.ARFoundation.Samples
         string m_ErrorMessage = "";
 
         StringBuilder m_StringBuilder = new StringBuilder();
+
+        // Arthur - Get and populate textures from AWS S3 bucket
+
+        private void Awake()
+        {
+            _ARTrackedImageManager = this.GetComponent<ARTrackedImageManager>();
+        }
+
+        public void DownloadButtonPressed()
+        {
+            StartCoroutine(AddImageTrackerByURL(_URLOne, 0, "One"));
+            StartCoroutine(AddImageTrackerByURL(_URLTwo, 1, "Two"));
+        }
+
+        IEnumerator AddImageTrackerByURL(string url, int index, string name)
+        {
+            _ARTrackedImageManager.enabled = false;
+            if (_ARTrackedImageManager.descriptor.supportsMutableLibrary)
+            {
+                UnityWebRequest webRequest = UnityWebRequestTexture.GetTexture(url);
+                yield return webRequest.SendWebRequest();
+
+                if (webRequest.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.Log(webRequest.error);
+                }
+                else
+                {
+                    Texture2D imageToTexture2d = DownloadHandlerTexture.GetContent(webRequest);
+                    imageToTexture2d.name = name;
+                    m_Images[index].texture = imageToTexture2d;
+                    Debug.Log("sucessfully downloaded texture: " + m_Images[index].texture.name + " dimension: " + m_Images[index].texture.dimension);
+                }
+
+            } else
+            {
+                Debug.LogError("no support mutable library");
+            }
+
+
+            _ARTrackedImageManager.enabled = true;
+        } 
 
         void OnGUI()
         {
@@ -108,7 +161,7 @@ namespace UnityEngine.XR.ARFoundation.Samples
                 }
                 case State.Done:
                 {
-                    GUILayout.Label("All images added");
+                    GUILayout.Label("All images added:" + m_Images[0].texture.name + " and " + m_Images[1].texture.name);
                     break;
                 }
                 case State.Error:
@@ -146,9 +199,14 @@ namespace UnityEngine.XR.ARFoundation.Samples
                         break;
                     }
 
-                    // You can either add raw image bytes or use the extension method (used below) which accepts
-                    // a texture. To use a texture, however, its import settings must have enabled read/write
-                    // access to the texture.
+                        // You can either add raw image bytes or use the extension method (used below) which accepts
+                        // a texture. To use a texture, however, its import settings must have enabled read/write
+                        // access to the texture.
+
+                        // Arthur - use Unity Web Request to get images from AWS S3 bucket
+                        // Image One
+                        
+
                     foreach (var image in m_Images)
                     {
                         if (!image.texture.isReadable)

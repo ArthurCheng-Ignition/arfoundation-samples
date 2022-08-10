@@ -79,9 +79,9 @@ namespace UnityEngine.XR.ARFoundation.Samples
             var planeGo = planeParentGo.transform.GetChild(0).gameObject;
 
             // Disable the visual plane if it is not being tracked
-            if (trackedImage.trackingState != TrackingState.None)
+            if (trackedImage.trackingState != TrackingState.None && trackedImage.trackingState != TrackingState.Limited)
             {
-                planeGo.SetActive(true);
+                trackedImage.gameObject.SetActive(true);
 
                 // The image extents is only valid when the image is being tracked
                 trackedImage.transform.localScale = new Vector3(trackedImage.size.x, 1f, trackedImage.size.y);
@@ -92,7 +92,7 @@ namespace UnityEngine.XR.ARFoundation.Samples
             }
             else
             {
-                planeGo.SetActive(false);
+                trackedImage.gameObject.SetActive(false);
             }
         }
 
