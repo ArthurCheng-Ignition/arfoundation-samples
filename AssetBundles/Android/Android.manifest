@@ -1,0 +1,10 @@
+ManifestFileVersion: 0
+CRC: 521645879
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: promo1
+      Dependencies: {}
+    Info_1:
+      Name: promo2
+      Dependencies: {}

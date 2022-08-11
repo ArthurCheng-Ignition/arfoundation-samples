@@ -25,7 +25,7 @@ MonoBehaviour:
       m_GuidHigh: 12263723139385508072
     m_Size: {x: 0.254, y: 0.16891992}
     m_SpecifySize: 1
-    m_Name: Rafflesia
+    m_Name: Default1
     m_Texture: {fileID: 2800000, guid: 8185ee60df6f2a44e8c0cf22387f31aa, type: 3}
   - m_SerializedGuid:
       m_GuidLow: 4688767676970561261
@@ -35,7 +35,7 @@ MonoBehaviour:
       m_GuidHigh: 3143750354108030859
     m_Size: {x: 0.1, y: 0.1}
     m_SpecifySize: 1
-    m_Name: Logo
+    m_Name: Default2
     m_Texture: {fileID: 2800000, guid: 5a804a4ff1f7e4038b1f1e6f4ad8a02b, type: 3}
   - m_SerializedGuid:
       m_GuidLow: 5602505921028117032
@@ -45,5 +45,5 @@ MonoBehaviour:
       m_GuidHigh: 4143232447317295274
     m_Size: {x: 0.104775, y: 0.104775}
     m_SpecifySize: 1
-    m_Name: QRCode
+    m_Name: Default3
     m_Texture: {fileID: 2800000, guid: a6fd8503774c0402aa403884f5b77f39, type: 3}

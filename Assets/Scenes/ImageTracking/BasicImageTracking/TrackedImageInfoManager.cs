@@ -44,9 +44,22 @@ namespace UnityEngine.XR.ARFoundation.Samples
 
         ARTrackedImageManager m_TrackedImageManager;
 
+        [SerializeField]
+        private GameObject[] _ARPrefabsToPlace;
+
+        private Dictionary<string, GameObject> _ARPrefabs = new Dictionary<string, GameObject>();
+
         void Awake()
         {
             m_TrackedImageManager = GetComponent<ARTrackedImageManager>();
+            // setup all game objects in dictionary
+            foreach(GameObject defaultPrefab in _ARPrefabsToPlace)
+            {
+                GameObject newPrefab = Instantiate(defaultPrefab, Vector3.zero, Quaternion.identity);
+                newPrefab.name = defaultPrefab.name;
+                newPrefab.SetActive(false);
+                _ARPrefabs.Add(defaultPrefab.name, newPrefab);
+            }
         }
 
         void OnEnable()
@@ -59,6 +72,7 @@ namespace UnityEngine.XR.ARFoundation.Samples
             m_TrackedImageManager.trackedImagesChanged -= OnTrackedImagesChanged;
         }
 
+        #region superceded - UpdateInfo (from sample)
         void UpdateInfo(ARTrackedImage trackedImage)
         {
             // Set canvas camera
@@ -95,19 +109,84 @@ namespace UnityEngine.XR.ARFoundation.Samples
                 trackedImage.gameObject.SetActive(false);
             }
         }
+        #endregion
 
         void OnTrackedImagesChanged(ARTrackedImagesChangedEventArgs eventArgs)
         {
-            foreach (var trackedImage in eventArgs.added)
-            {
-                // Give the initial image a reasonable default scale
-                trackedImage.transform.localScale = new Vector3(0.01f, 1f, 0.01f);
+            ARTrackedImage trackedImage = null;
 
-                UpdateInfo(trackedImage);
+            // for new images detected
+            for(int i = 0; i < eventArgs.added.Count; i++)
+            {
+                trackedImage = eventArgs.added[i];
+                Debug.Log("NEW Image detected: " + trackedImage.referenceImage.name);
+                UpdateARImage(trackedImage);
             }
 
-            foreach (var trackedImage in eventArgs.updated)
-                UpdateInfo(trackedImage);
+            //foreach (var trackedImage in eventArgs.added)
+            //{    
+            //    //UpdateInfo(trackedImage);
+
+            //    UpdateARImage(trackedImage);
+            //}
+
+            for(int i = 0; i < eventArgs.updated.Count; i++)
+            {
+                trackedImage = eventArgs.updated[i];
+                if(trackedImage.trackingState == TrackingState.Tracking)
+                {
+                    UpdateARImage(trackedImage);
+                } else
+                {
+                    // hide non-tracked object
+                    _ARPrefabs[trackedImage.referenceImage.name].SetActive(false);
+                }
+            }
+
+            //foreach (var trackedImage in eventArgs.updated)
+            //{
+            //    //UpdateInfo(trackedImage);
+
+            //    UpdateARImage(trackedImage);
+            //}
+
+            //foreach(var trackedImage in eventArgs.removed)
+            //{
+            //    _ARPrefabs[trackedImage.name].SetActive(false);
+            //}
+        }
+
+        void UpdateARImage(ARTrackedImage trackedImage)
+        {
+            //assign and place game object
+            AssignGameObject(trackedImage.referenceImage.name, trackedImage.transform.position);
+        }
+
+        void AssignGameObject(string name, Vector3 newPosition)
+        {
+            if(_ARPrefabsToPlace != null)
+            {
+                _ARPrefabs[name].SetActive(true);
+                _ARPrefabs[name].transform.position = newPosition;
+                foreach(GameObject go in _ARPrefabs.Values)
+                {
+                    if(go.name != name)
+                    {
+                        go.SetActive(false);
+                    }
+                }
+            }
+        }
+
+        public void AddDownloadedModels(GameObject[] downloadedModels)
+        {
+            foreach(GameObject downloadedModel in downloadedModels)
+            {
+                GameObject newPrefab = Instantiate(downloadedModel, Vector3.zero, Quaternion.identity);
+                newPrefab.name = downloadedModel.name;
+                newPrefab.SetActive(false);
+                _ARPrefabs.Add(downloadedModel.name, newPrefab);
+            }
         }
     }
 }
